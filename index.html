@@ -1,0 +1,53 @@
+<!DOCTYPE>
+<html>
+<head>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
+	<script src="highcharts.js" type="text/javascript"></script>
+</head>
+<script>
+jQuery( document ).ready(function() {
+	var chart;
+
+	var setChart = function( index ) {
+		jQuery.getJSON( 'http://www.khanacademy.com/exercisestats/exerciseovertime?chart=area_spline&past_days=30&rsecs=30&buckets=500&ix=' + index + '&callback=?', function( data ) {
+			chart = new Highcharts.Chart( data );
+		});
+	};
+
+	var setChartAll = function() {
+		jQuery.getJSON( 'http://www.khanacademy.com/exercisestats/exerciseovertime?chart=area_spline&past_days=5&show=all&callback=?', function( data ) {
+			chart = new Highcharts.Chart( data );
+		});
+	};
+
+	jQuery.getJSON( "http://www.khanacademy.org/api/v1/exercises?callback=?", function( data ) {
+		var sortedExercises = data.sort( function(a, b) {
+			var compA = a.display_name.toUpperCase();
+			var compB = b.display_name.toUpperCase();
+			return (compA < compB) ? -1 : (compA > compB) ? 1 : 0;
+		});
+
+		jQuery.each( sortedExercises, function( n ) {
+			var option = jQuery( "<option>" ).text( this.display_name ).appendTo( jQuery( "#exerciselist" ) );
+			option.attr( "value", n );
+		});
+		var option = jQuery( "<option>" ).text( "_ All _" ).appendTo( jQuery( "#exerciselist" ) );
+		option.attr( "value", "all" );
+	});
+
+	jQuery( "#exerciselist" ).change(function( event ) {
+		var ex = jQuery( "#exerciselist" ).val();
+		if ( ex === "all" ) {
+			setChartAll();
+		} else {
+			setChart( ex );
+		}
+	});
+
+});
+</script>
+<body>
+<div id="container"></div>
+<select id="exerciselist" size="40"></select>
+</body>
+</html>
